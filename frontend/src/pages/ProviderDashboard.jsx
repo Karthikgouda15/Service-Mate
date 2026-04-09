@@ -31,7 +31,6 @@ const ProviderDashboard = () => {
     const socket = useSocket();
 
     const [activeTab, setActiveTab] = useState('dashboard');
-    const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isOnline, setIsOnline] = useState(false);
     const [profile, setProfile] = useState(null);
     const [bookings, setBookings] = useState([]);
@@ -280,90 +279,78 @@ const ProviderDashboard = () => {
     }
 
     return (
-        <div className="flex min-h-[calc(100vh-80px)] -mx-4 -mt-4">
-            {/* Mobile menu toggle */}
-            <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="lg:hidden fixed top-[88px] left-4 z-50 w-10 h-10 bg-black text-white rounded-xl flex items-center justify-center shadow-lg"
-            >
-                {sidebarOpen ? <XIcon size={18} /> : <Menu size={18} />}
-            </button>
-
-            {/* Sidebar */}
-            <aside className={`
-                fixed lg:sticky top-0 left-0 h-screen w-[260px] bg-black text-white z-40
-                flex flex-col transition-transform duration-300
-                ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-            `}>
-                {/* Provider Header */}
-                <div className="p-6 border-b border-white/10">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-lg font-bold">
+        <div className="min-h-screen bg-[#F5F5F7] pb-20">
+            {/* Horizontal Header */}
+            <div className="bg-white border-b border-[#F5F5F7] sticky top-0 z-[40]">
+                <div className="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 bg-black text-white rounded-2xl flex items-center justify-center text-xl font-bold shadow-apple">
                             {profile?.userId?.name?.charAt(0) || 'P'}
                         </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="font-bold text-sm truncate">{profile?.userId?.name || 'Provider'}</p>
-                            <p className="text-[11px] text-white/40 truncate">{profile?.userId?.email}</p>
+                        <div className="hidden sm:block">
+                            <h2 className="font-black text-xl tracking-tight leading-none mb-1">{profile?.userId?.name || 'Provider'}</h2>
+                            <p className="text-[11px] text-[#86868B] font-bold uppercase tracking-widest">{profile?.userId?.email}</p>
                         </div>
                     </div>
-                    <button
-                        onClick={toggleStatus}
-                        className={`w-full h-10 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
-                            isOnline
-                                ? 'bg-white text-black'
-                                : 'bg-white/10 text-white/60 hover:bg-white/20'
-                        }`}
-                    >
-                        <Power size={14} />
-                        {isOnline ? 'Online' : 'Go Online'}
-                    </button>
+
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={toggleStatus}
+                            className={`h-12 px-6 rounded-2xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 transition-all shadow-apple active:scale-95 ${
+                                isOnline
+                                    ? 'bg-black text-white'
+                                    : 'bg-[#F5F5F7] text-[#1D1D1F] hover:bg-gray-200'
+                            }`}
+                        >
+                            <Power size={14} className={isOnline ? 'animate-pulse' : ''} />
+                            {isOnline ? 'Online' : 'Go Online'}
+                        </button>
+                        
+                        <button 
+                            onClick={handleLogout}
+                            className="w-12 h-12 flex items-center justify-center text-[#86868B] hover:text-red-500 transition-colors"
+                        >
+                            <LogOut size={20} />
+                        </button>
+                    </div>
                 </div>
 
-                {/* Nav Items */}
-                <nav className="flex-1 p-4 space-y-1">
-                    {TABS.map(tab => {
-                        const Icon = tab.icon;
-                        const isActive = activeTab === tab.id;
-                        return (
-                            <button
-                                key={tab.id}
-                                onClick={() => { setActiveTab(tab.id); setSidebarOpen(false); }}
-                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
-                                    isActive
-                                        ? 'bg-white text-black'
-                                        : 'text-white/50 hover:text-white hover:bg-white/5'
-                                }`}
-                            >
-                                <Icon size={18} />
-                                {tab.label}
-                                {tab.id === 'bookings' && pendingBookings.length > 0 && (
-                                    <span className="ml-auto text-[10px] bg-white/20 text-white px-2 py-0.5 rounded-full">
-                                        {pendingBookings.length}
-                                    </span>
-                                )}
-                            </button>
-                        );
-                    })}
-                </nav>
-
-                {/* Logout */}
-                <div className="p-4 border-t border-white/10">
-                    <button
-                        onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-white/40 hover:text-red-400 hover:bg-white/5 transition-all"
-                    >
-                        <LogOut size={18} /> Logout
-                    </button>
+                {/* Horizontal Navigation */}
+                <div className="max-w-7xl mx-auto px-6">
+                    <nav className="flex items-center gap-8 overflow-x-auto no-scrollbar py-2">
+                        {TABS.map(tab => {
+                            const Icon = tab.icon;
+                            const isActive = activeTab === tab.id;
+                            return (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`relative py-4 flex items-center gap-2 text-[11px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+                                        isActive ? 'text-black' : 'text-[#86868B] hover:text-black'
+                                    }`}
+                                >
+                                    <Icon size={14} />
+                                    {tab.label}
+                                    {tab.id === 'bookings' && pendingBookings.length > 0 && (
+                                        <span className="ml-1 bg-black text-white px-1.5 py-0.5 rounded-full text-[9px]">
+                                            {pendingBookings.length}
+                                        </span>
+                                    )}
+                                    {isActive && (
+                                        <motion.div 
+                                            layoutId="activeTab"
+                                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-black"
+                                        />
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </nav>
                 </div>
-            </aside>
-
-            {/* Overlay for mobile */}
-            {sidebarOpen && (
-                <div className="fixed inset-0 bg-black/50 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />
-            )}
+            </div>
 
             {/* Main Content */}
-            <main className="flex-1 p-6 lg:p-10 overflow-y-auto">
+            <main className="max-w-7xl mx-auto p-6 lg:p-10">
                 <AnimatePresence mode="wait">
                     {activeTab === 'dashboard' && <DashboardTab key="dashboard" profile={profile} bookings={bookings} pendingBookings={pendingBookings} activeBookings={activeBookings} completedBookings={completedBookings} totalEarnings={totalEarnings} isOnline={isOnline} />}
                     {activeTab === 'services' && (

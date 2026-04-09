@@ -321,29 +321,34 @@ const Search = () => {
                     <SearchIcon className="absolute left-6 top-1/2 -translate-y-1/2 text-[#86868B]" size={22} />
                     <input
                         type="text"
-                        placeholder="Search services or professionals..."
-                        className="w-full h-14 bg-[#F5F5F7] rounded-2xl pl-16 pr-6 text-lg font-medium focus:bg-white border-2 border-transparent focus:border-black outline-none transition-all"
+                        placeholder="Search for any service..."
+                        className="w-full h-16 bg-[#F5F5F7]/80 rounded-[2rem] pl-16 pr-6 text-lg font-medium focus:bg-white border-2 border-transparent focus:border-black outline-none transition-all shadow-sm"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && navigate(`/search?category=${encodeURIComponent(searchQuery)}`)}
                     />
                 </div>
-                <button className="h-14 px-8 bg-black text-white hover:bg-zinc-800 rounded-2xl font-bold transition-all flex items-center justify-center gap-2">
+                <button className="h-16 px-10 bg-black text-white hover:bg-zinc-900 rounded-[2rem] font-bold transition-all flex items-center justify-center gap-3 shadow-apple active:scale-95">
                     <SlidersHorizontal size={20} />
-                    <span>Filters</span>
+                    <span className="text-sm uppercase tracking-widest font-black">Filters</span>
                 </button>
             </div>
 
             <div className="flex-1 flex flex-col md:flex-row relative">
-                {/* List View */}
-                <div className="w-full md:w-[500px] p-10 md:p-14 space-y-10 min-h-screen bg-white border-r border-[#F5F5F7]">
-                    <div className="space-y-4">
-                        <h3 className="text-5xl font-black tracking-tighter text-black">
-                            {searchParams.get('category') || 'Nearby Experts'}
-                        </h3>
-                        <div className="flex items-center gap-2">
+                {/* List View - Added pt-8 to clear sticky headers better */}
+                <div className="w-full md:w-[500px] p-10 md:p-14 md:pt-16 space-y-12 min-h-screen bg-white border-r border-[#F5F5F7]">
+                    <div className="space-y-6">
+                        <div className="space-y-2">
+                            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#86868B] flex items-center gap-2">
+                                <MapPin size={12} /> Results for you
+                            </p>
+                            <h3 className="text-4xl font-black tracking-tighter text-black leading-tight">
+                                {searchParams.get('category') || 'Nearby Experts'}
+                            </h3>
+                        </div>
+                        <div className="flex items-center gap-3 bg-[#F5F5F7] w-fit px-4 py-2 rounded-full border border-black/5">
                             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                            <p className="text-[11px] font-black uppercase tracking-widest text-[#86868B]">{providers.length} Professionals Online</p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[#1D1D1F]">{providers.length} Verified Professionals Online</p>
                         </div>
                     </div>
 
@@ -368,15 +373,15 @@ const Search = () => {
                                     )}
                                     
                                     <div className="flex gap-8">
-                                        <div className="w-28 h-28 bg-white rounded-[2rem] overflow-hidden border border-[#D2D2D7]/20 shadow-sm flex-shrink-0 flex items-center justify-center relative group-hover:shadow-md transition-shadow">
+                                        <div className="w-28 h-28 bg-white rounded-[2rem] overflow-hidden border border-[#D2D2D7]/20 shadow-apple flex-shrink-0 flex items-center justify-center relative group-hover:shadow-apple-lg transition-all duration-500">
                                             {p.userId.avatar ? (
-                                                <img src={p.userId.avatar} className="w-full h-full object-cover" />
+                                                <img src={p.userId.avatar} className="w-full h-full object-cover" alt="" />
                                             ) : (
                                                 <div className="text-black group-hover:scale-110 transition-transform duration-500">
                                                     {categoryMeta[p.services[0]?.category]?.icon || <Zap size={32} />}
                                                 </div>
                                             )}
-                                            <div className="absolute bottom-2 right-2 bg-white rounded-full p-1 shadow-sm border border-[#F5F5F7]">
+                                            <div className="absolute bottom-2 right-2 bg-white rounded-full p-1.5 shadow-sm border border-[#F5F5F7]">
                                                 <ShieldCheck size={16} className="text-black" />
                                             </div>
                                         </div>
@@ -385,22 +390,22 @@ const Search = () => {
                                             <div className="space-y-1">
                                                 <div className="flex justify-between items-start">
                                                     <h4 className="font-bold text-2xl text-black tracking-tight group-hover:text-black transition-colors">{p.userId.name}</h4>
-                                                    <div className="flex items-center gap-1.5 bg-[#F5F5F7] group-hover:bg-black group-hover:text-white px-3 py-1 rounded-full text-[11px] font-black transition-all">
+                                                    <div className="flex items-center gap-1.5 bg-[#F5F5F7] group-hover:bg-black group-hover:text-white px-3 py-1.5 rounded-full text-[11px] font-black tracking-widest transition-all">
                                                         <Star size={12} className={selectedProvider?._id === p._id ? 'fill-white' : 'fill-black'} /> {p.rating.toFixed(1)}
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-2">
                                                     <p className="text-[11px] text-[#86868B] font-bold uppercase tracking-widest">{p.services[0]?.category} Specialist</p>
                                                     <div className="w-1 h-1 rounded-full bg-[#D2D2D7]" />
-                                                    <p className="text-[11px] text-green-600 font-bold uppercase tracking-widest flex items-center gap-1">
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" /> Verified Expert
+                                                    <p className="text-[11px] text-green-600 font-bold uppercase tracking-widest flex items-center gap-1.5">
+                                                        Verified Expert
                                                     </p>
                                                 </div>
                                             </div>
                                             
                                             <div className="mt-6 flex items-end justify-between">
                                                 <div className="space-y-1">
-                                                    <p className="text-[10px] text-[#86868B] font-bold uppercase tracking-widest leading-none">Starting from</p>
+                                                    <p className="text-[10px] text-[#86868B] font-black uppercase tracking-[0.15em] leading-none">Price per hour</p>
                                                     <p className="text-3xl font-black text-black tracking-tighter flex items-baseline gap-1">
                                                         ₹{p.services[0]?.basePrice}
                                                         <span className="text-xs text-[#86868B] font-bold uppercase tracking-widest">/{p.services[0]?.priceUnit}</span>
@@ -410,7 +415,7 @@ const Search = () => {
                                                     whileHover={{ scale: 1.05 }}
                                                     whileTap={{ scale: 0.95 }}
                                                     onClick={(e) => handleBookNow(e, p)}
-                                                    className="h-12 px-8 bg-black text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:shadow-apple-lg hover:bg-zinc-800 transition-all flex items-center justify-center gap-2"
+                                                    className="h-12 px-8 bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:shadow-apple-lg hover:bg-zinc-900 transition-all flex items-center justify-center gap-2 shadow-apple"
                                                 >
                                                     Book Now <ChevronRight size={16} />
                                                 </motion.button>

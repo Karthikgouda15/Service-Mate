@@ -40,7 +40,7 @@ const Register = () => {
     };
 
     return (
-        <div className="max-w-md mx-auto pt-8">
+        <div className="max-w-md mx-auto py-12">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

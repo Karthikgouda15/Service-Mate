@@ -69,7 +69,7 @@ function AppContent() {
     return (
         <div className="min-h-screen font-body">
             {!isProviderDashboard && <Navbar />}
-            <main className={isProviderDashboard ? '' : 'container mx-auto px-4 pb-24'}>
+            <main className={isProviderDashboard ? '' : 'container mx-auto px-4 pt-20 pb-24'}>
                 <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/search" element={<Search />} />
