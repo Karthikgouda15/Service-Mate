@@ -3,25 +3,41 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, MapPin, Clock, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/api';
+import useSocket from '../hooks/useSocket';
 
 const MyBookings = () => {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
+    const fetchBookings = async () => {
+        try {
+            const { data } = await api.get('/bookings/customer/me');
+            setBookings(data);
+        } catch (error) {
+            console.error('Failed to fetch bookings', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchBookings = async () => {
-            try {
-                const { data } = await api.get('/bookings/customer/me');
-                setBookings(data);
-            } catch (error) {
-                console.error('Failed to fetch bookings', error);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchBookings();
     }, []);
+
+
+    // Listen for real-time updates to keep the customer's list in sync
+    const socket = useSocket();
+    useEffect(() => {
+        if (socket) {
+            socket.on('booking_status_updated', () => {
+                fetchBookings();
+            });
+            return () => {
+                socket.off('booking_status_updated');
+            }
+        }
+    }, [socket]);
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -32,6 +48,11 @@ const MyBookings = () => {
             case 'cancelled': return 'bg-red-100 text-red-700';
             default: return 'bg-slate-100 text-slate-700';
         }
+    };
+
+    const getAvatarUrl = (name, avatar) => {
+        if (avatar && avatar.startsWith('http')) return avatar;
+        return `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'Expert')}&background=000000&color=ffffff&size=150&font-size=0.4`;
     };
 
     if (loading) {
@@ -78,7 +99,7 @@ const MyBookings = () => {
                                     <div className="space-y-6">
                                         <div className="flex items-center gap-5">
                                             <div className="w-14 h-14 bg-[#F5F5F7] rounded-2xl overflow-hidden border border-[#D2D2D7]/20 shadow-inner">
-                                                <img src={booking.providerId?.avatar || 'https://via.placeholder.com/150'} alt="Provider" className="w-full h-full object-cover" />
+                                                <img src={getAvatarUrl(booking.providerId?.name, booking.providerId?.avatar)} alt="Provider" className="w-full h-full object-cover" />
                                             </div>
                                             <div>
                                                 <p className="font-bold text-lg text-black tracking-tight">{booking.providerId?.name || 'Assigning Expert...'}</p>

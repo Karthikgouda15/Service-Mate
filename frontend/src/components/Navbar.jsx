@@ -26,22 +26,26 @@ const Navbar = () => {
                 </Link>
 
                 <nav className="flex items-center gap-10">
-                    <div className="flex items-center gap-10 font-bold text-[13px] uppercase tracking-widest text-[#86868B] transition-all">
-                        <Link to="/" className={`hover:text-black transition-colors relative py-2 ${location.pathname === '/' ? 'text-black' : ''}`}>
-                            Home
-                            {location.pathname === '/' && <motion.div layoutId="nav-dot-desktop" className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-black rounded-full" />}
-                        </Link>
-                        <Link to="/search" className={`hover:text-black transition-colors relative py-2 ${location.pathname === '/search' ? 'text-black' : ''}`}>
-                            Explore
-                            {location.pathname === '/search' && <motion.div layoutId="nav-dot-desktop" className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-black rounded-full" />}
-                        </Link>
-                        <Link to="/bookings" className={`hover:text-black transition-colors relative py-2 ${location.pathname === '/bookings' ? 'text-black' : ''}`}>
-                            My Bookings
-                            {location.pathname === '/bookings' && <motion.div layoutId="nav-dot-desktop" className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-black rounded-full" />}
-                        </Link>
-                    </div>
+                    {(!user || user?.role === 'customer') && (
+                        <>
+                            <div className="flex items-center gap-10 font-bold text-[13px] uppercase tracking-widest text-[#86868B] transition-all">
+                                <Link to="/" className={`hover:text-black transition-colors relative py-2 ${location.pathname === '/' ? 'text-black' : ''}`}>
+                                    Home
+                                    {location.pathname === '/' && <motion.div layoutId="nav-dot-desktop" className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-black rounded-full" />}
+                                </Link>
+                                <Link to="/search" className={`hover:text-black transition-colors relative py-2 ${location.pathname === '/search' ? 'text-black' : ''}`}>
+                                    Explore
+                                    {location.pathname === '/search' && <motion.div layoutId="nav-dot-desktop" className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-black rounded-full" />}
+                                </Link>
+                                <Link to="/bookings" className={`hover:text-black transition-colors relative py-2 ${location.pathname === '/bookings' ? 'text-black' : ''}`}>
+                                    My Bookings
+                                    {location.pathname === '/bookings' && <motion.div layoutId="nav-dot-desktop" className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-black rounded-full" />}
+                                </Link>
+                            </div>
 
-                    <div className="h-6 w-px bg-[#F5F5F7] mx-2" />
+                            <div className="h-6 w-px bg-[#F5F5F7] mx-2" />
+                        </>
+                    )}
 
                     {isAuthenticated ? (
                         <div className="flex items-center gap-6">
@@ -64,29 +68,31 @@ const Navbar = () => {
             </header>
 
             {/* Mobile Bottom Navigation - Floating Glass Style */}
-            <nav className="md:hidden fixed bottom-8 left-1/2 -translate-x-1/2 w-[92%] h-20 glass shadow-[0_20px_50px_rgba(0,0,0,0.3)] rounded-[2.5rem] z-[1000] flex items-center justify-around px-6 border border-white/20">
-                {navItems.map((item) => (
-                    <Link
-                        key={item.path}
-                        to={item.path}
-                        className={`flex flex-col items-center justify-center gap-1.5 transition-all relative flex-1 h-full ${location.pathname === item.path ? 'text-black' : 'text-[#86868B]'}`}
-                    >
-                        <motion.div
-                            whileTap={{ scale: 0.85 }}
-                            className={`${location.pathname === item.path ? 'scale-110' : ''}`}
+            {(!user || user?.role === 'customer') && (
+                <nav className="md:hidden fixed bottom-8 left-1/2 -translate-x-1/2 w-[92%] h-20 glass shadow-[0_20px_50px_rgba(0,0,0,0.3)] rounded-[2.5rem] z-[1000] flex items-center justify-around px-6 border border-white/20">
+                    {navItems.map((item) => (
+                        <Link
+                            key={item.path}
+                            to={item.path}
+                            className={`flex flex-col items-center justify-center gap-1.5 transition-all relative flex-1 h-full ${location.pathname === item.path ? 'text-black' : 'text-[#86868B]'}`}
                         >
-                            {item.icon}
-                        </motion.div>
-                        <span className="text-[10px] font-black uppercase tracking-widest leading-none">{item.label}</span>
-                        {location.pathname === item.path && (
                             <motion.div
-                                layoutId="nav-indicator-mobile"
-                                className="w-1 h-1 bg-black rounded-full absolute bottom-2"
-                            />
-                        )}
-                    </Link>
-                ))}
-            </nav>
+                                whileTap={{ scale: 0.85 }}
+                                className={`${location.pathname === item.path ? 'scale-110' : ''}`}
+                            >
+                                {item.icon}
+                            </motion.div>
+                            <span className="text-[10px] font-black uppercase tracking-widest leading-none">{item.label}</span>
+                            {location.pathname === item.path && (
+                                <motion.div
+                                    layoutId="nav-indicator-mobile"
+                                    className="w-1 h-1 bg-black rounded-full absolute bottom-2"
+                                />
+                            )}
+                        </Link>
+                    ))}
+                </nav>
+            )}
         </>
     );
 };

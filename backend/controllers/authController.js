@@ -165,8 +165,11 @@ const forgotPassword = async (req, res) => {
             console.log('Skipping real email dispatch. OTP printed to console above.');
         }
         
-        // Return success regardless of node mailer passing
-        res.status(200).json({ message: 'OTP sent successfully' });
+        // Return success and include the OTP for "Demo Mode" end-to-end frontend connection
+        res.status(200).json({ 
+            message: 'OTP sent successfully',
+            demo_otp: otp
+        });
 
     } catch (error) {
         res.status(500).json({ message: error.message });

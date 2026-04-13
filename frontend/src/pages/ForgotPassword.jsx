@@ -25,8 +25,24 @@ const ForgotPassword = () => {
 
         setLoading(true);
         try {
-            await api.post('/auth/forgotpassword', { email });
-            toast.success('OTP sent to your email!');
+            const response = await api.post('/auth/forgotpassword', { email });
+            toast.success('OTP sent! Check your inbox.');
+            
+            // Demo Mode Auto-Fill: Connects end-to-end without real email!
+            if (response.data?.demo_otp) {
+                toast(`DEMO MODE: Auto-filling OTP (${response.data.demo_otp})`, { 
+                    icon: '🚀', 
+                    duration: 5000,
+                    style: { background: '#000', color: '#fff' }
+                });
+                
+                // Convert the 6 digit string into an array for the 6 boxes
+                const otpArray = String(response.data.demo_otp).split('').slice(0, 6);
+                // Fill remaining with empty strings if length < 6 (just in case)
+                while(otpArray.length < 6) otpArray.push('');
+                setOtp(otpArray);
+            }
+            
             setStep(2);
         } catch (error) {
             toast.error(error.response?.data?.message || 'Something went wrong. Could not send OTP.');

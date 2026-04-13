@@ -106,10 +106,16 @@ const updateBookingStatus = async (req, res) => {
 
         // Emit real-time update
         const io = req.app.get('io');
-        io.to(`booking_${booking._id}`).emit('booking_status_updated', { 
+        const updatePayload = { 
+            bookingId: booking._id,
             status: booking.status,
             otp: booking.otp 
-        });
+        };
+        
+        io.to(`booking_${booking._id}`).emit('booking_status_updated', updatePayload);
+        // Also emit directly to the individuals so their global dashboards update in real time
+        io.to(`user_${booking.customerId}`).emit('booking_status_updated', updatePayload);
+        io.to(`user_${booking.providerId}`).emit('booking_status_updated', updatePayload);
 
         res.json(booking);
     } catch (error) {

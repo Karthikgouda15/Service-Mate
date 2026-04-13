@@ -29,7 +29,10 @@ function AppContent() {
 
     useEffect(() => {
         if (isAuthenticated && socket && user) {
-            // Join specific rooms for notifications
+            // Join personalized room for real-time dashboard notifications regardless of role
+            socket.emit('join_user_room', user._id);
+
+            // Join specific rooms for additional provider features
             if (user.role === 'provider') {
                 socket.emit('join_provider_room', user._id);
             }

@@ -70,12 +70,26 @@ const ProviderDashboard = () => {
                     icon: '🔔',
                     duration: 5000,
                 });
-                setBookings(prev => [booking, ...prev]);
+                fetchData();
+            });
+
+            // Listen for global booking updates for auto-sync and Demo auto-fill
+            socket.on('booking_status_updated', (data) => {
+                if (data.status === 'confirmed' && data.otp) {
+                     toast(`DEMO MODE: Auto-filling Job OTP (${data.otp})`, { 
+                        icon: '🚀', 
+                        duration: 5000,
+                        style: { background: '#000', color: '#fff' }
+                    });
+                    setOtpInput(data.otp);
+                }
+                fetchData(); // Auto update tables
             });
         }
         return () => {
             if (socket) {
                 socket.off('new_booking');
+                socket.off('booking_status_updated');
             }
         };
     }, [socket, user]);
@@ -283,15 +297,26 @@ const ProviderDashboard = () => {
             {/* Horizontal Header */}
             <div className="bg-white border-b border-[#F5F5F7] sticky top-0 z-[40]">
                 <div className="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 bg-black text-white rounded-2xl flex items-center justify-center text-xl font-bold shadow-apple">
-                            {profile?.userId?.name?.charAt(0) || 'P'}
-                        </div>
+                    <div className="flex items-center gap-6">
+                        <button onClick={() => navigate('/')} className="flex items-center gap-3 active:scale-95 transition-transform group">
+                            <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform duration-500">
+                                <div className="w-5 h-5 bg-white rounded-sm rotate-45" />
+                            </div>
+                            <span className="text-2xl font-headings font-bold text-black tracking-tighter hidden md:block">ServiceMate</span>
+                        </button>
+                        
+                        <div className="h-10 w-px bg-gray-200 hidden md:block" />
+
+                        <div className="flex items-center gap-4">
+                            <div className="w-14 h-14 bg-black text-white rounded-2xl flex items-center justify-center text-xl font-bold shadow-apple">
+                                {profile?.userId?.name?.charAt(0) || 'P'}
+                            </div>
                         <div className="hidden sm:block">
                             <h2 className="font-black text-xl tracking-tight leading-none mb-1">{profile?.userId?.name || 'Provider'}</h2>
                             <p className="text-[11px] text-[#86868B] font-bold uppercase tracking-widest">{profile?.userId?.email}</p>
                         </div>
                     </div>
+                </div>
 
                     <div className="flex items-center gap-4">
                         <button

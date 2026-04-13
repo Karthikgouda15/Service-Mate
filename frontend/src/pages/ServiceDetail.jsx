@@ -26,6 +26,11 @@ const ServiceDetail = () => {
 
     const meta = categoryMeta[category] || { icon: '🔧', color: 'from-slate-500 to-slate-700', bg: 'bg-slate-50', text: 'text-slate-600', border: 'border-slate-200', desc: 'Professional service providers near you.' };
 
+    const getAvatarUrl = (name, avatar) => {
+        if (avatar && avatar.startsWith('http')) return avatar;
+        return `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'Expert')}&background=000000&color=ffffff&size=150&font-size=0.4`;
+    };
+
     useEffect(() => {
         if (!isLocationSet) getUserLocation();
     }, []);
@@ -141,7 +146,7 @@ const ServiceDetail = () => {
                             {/* Provider Info */}
                             <div className="flex gap-6">
                                 <div className="w-24 h-24 bg-[#F5F5F7] rounded-[2.25rem] overflow-hidden flex-shrink-0 border border-[#D2D2D7]/20 shadow-inner group-hover:scale-105 transition-transform duration-500">
-                                    <img src={p.userId?.avatar || 'https://via.placeholder.com/150'} alt={p.userId?.name} className="w-full h-full object-cover" />
+                                    <img src={getAvatarUrl(p.userId?.name, p.userId?.avatar)} alt={p.userId?.name} className="w-full h-full object-cover" />
                                 </div>
                                 <div className="flex-1 min-w-0 flex flex-col justify-center">
                                     <div className="flex justify-between items-start">

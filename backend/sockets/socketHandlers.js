@@ -76,6 +76,11 @@ module.exports = (io) => {
             socket.join(`provider_${providerUserId}`);
         });
 
+        // Join a general user room for global notifications (both customer & provider)
+        socket.on('join_user_room', (userId) => {
+            socket.join(`user_${userId}`);
+        });
+
         // Join a specific booking room for real-time tracking
         socket.on('join_booking', (bookingId) => {
             socket.join(`booking_${bookingId}`);

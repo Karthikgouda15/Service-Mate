@@ -14,12 +14,13 @@ api.interceptors.request.use((config) => {
     return Promise.reject(error);
 });
 
-// Auto-refresh token logic could be added here
+// Global response interceptor for error handling
 api.interceptors.response.use((response) => response, async (error) => {
-    const originalRequest = error.config;
-    if (error.response.status === 401 && !originalRequest._retry) {
-        originalRequest._retry = true;
-        // Attempt to refresh token logic...
+    if (error.response?.status === 401) {
+        // Token is invalid or expired. Clear session and redirect to clear state.
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
     }
     return Promise.reject(error);
 });
