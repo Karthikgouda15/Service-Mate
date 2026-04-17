@@ -52,3 +52,13 @@ h1, h2, h3, h4, h5, h6 {
 .apple-button {
     @apply h-12 px-6 bg-black text-white rounded-full font-semibold hover:bg-zinc-800 active:scale-95 transition-all;
 }
+
+/* Premium Map Tiles Filter - Apple Monochrome */
+.map-tiles-premium {
+    filter: grayscale(100%) brightness(1.1) contrast(0.9) opacity(0.85);
+    transition: filter 0.5s ease-in-out;
+}
+
+.map-tiles-premium:hover {
+    filter: grayscale(100%) brightness(1) contrast(1.1) opacity(1);
+}

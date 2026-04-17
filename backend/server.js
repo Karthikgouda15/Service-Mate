@@ -44,6 +44,7 @@ app.use('/api/services', require('./routes/serviceRoutes'));
 app.use('/api/providers', require('./routes/providerRoutes'));
 app.use('/api/bookings', require('./routes/bookingRoutes'));
 app.use('/api/chat', require('./routes/chatRoutes'));
+app.use('/api/admin', require('./routes/adminRoutes'));
 
 // Socket.io initialization
 require('./sockets/socketHandlers')(io);

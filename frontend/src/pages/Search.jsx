@@ -39,12 +39,22 @@ const ChangeView = ({ center }) => {
 const BookingPanel = ({ provider, onClose, coords }) => {
     const navigate = useNavigate();
     const { isAuthenticated } = useAuthStore();
+    const [selectedService, setSelectedService] = useState(() => {
+        const query = new URLSearchParams(window.location.search).get('category')?.toLowerCase();
+        if (query) {
+            const found = provider.services.find(s => 
+                s.subcategory.toLowerCase().includes(query) || 
+                s.category.toLowerCase().includes(query)
+            );
+            if (found) return found;
+        }
+        return provider.services[0] || null;
+    });
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
 
-    const service = provider.services[0];
-    const basePrice = service?.dynamicPrice || service?.basePrice || 200;
-    const priceUnit = service?.priceUnit || 'hr';
+    const basePrice = selectedService?.dynamicPrice || selectedService?.basePrice || 200;
+    const priceUnit = selectedService?.priceUnit || 'hr';
 
     const [bookingData, setBookingData] = useState({
         date: new Date().toISOString().split('T')[0],
@@ -83,6 +93,11 @@ const BookingPanel = ({ provider, onClose, coords }) => {
             return;
         }
 
+        if (!selectedService) {
+            toast.error('Please select a service');
+            return;
+        }
+
         if (!bookingData.date || !bookingData.time || !bookingData.address) {
             toast.error('Please fill all required fields');
             return;
@@ -94,8 +109,8 @@ const BookingPanel = ({ provider, onClose, coords }) => {
 
             const { data } = await api.post('/bookings', {
                 providerId: provider.userId._id,
-                serviceType: service.category,
-                description: bookingData.description || `${service.category} service`,
+                serviceType: selectedService.subcategory,
+                description: bookingData.description || `${selectedService.subcategory} service`,
                 scheduledAt,
                 address: bookingData.address,
                 location: {
@@ -141,18 +156,36 @@ const BookingPanel = ({ provider, onClose, coords }) => {
                                 {provider.userId.avatar ? (
                                     <img src={provider.userId.avatar} className="w-full h-full object-cover" />
                                 ) : (
-                                    categoryMeta[service?.category]?.icon || <Zap size={24} />
+                                    categoryMeta[selectedService?.category]?.icon || <Zap size={24} />
                                 )}
                             </div>
                             <div>
                                 <h3 className="font-bold text-lg text-black tracking-tight">{provider.userId.name}</h3>
-                                <p className="text-[11px] text-[#86868B] font-bold uppercase tracking-widest">{service?.category} Expert</p>
+                                <p className="text-[11px] text-[#86868B] font-bold uppercase tracking-widest">{selectedService?.subcategory || 'Verified Expert'}</p>
                             </div>
                         </div>
                         <button onClick={onClose} className="w-10 h-10 rounded-full bg-[#F5F5F7] hover:bg-[#E5E5E7] flex items-center justify-center transition-colors">
                             <X size={18} className="text-black" />
                         </button>
                     </div>
+                    
+                    {/* NEW: Multi-Service Selection Chips */}
+                    {provider.services?.length > 1 && (
+                        <div className="mt-8 space-y-3">
+                            <label className="text-[11px] font-black uppercase tracking-widest text-[#86868B]">Select Task</label>
+                            <div className="flex flex-wrap gap-2">
+                                {provider.services.map(s => (
+                                    <button
+                                        key={s._id}
+                                        onClick={() => setSelectedService(s)}
+                                        className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all border-2 ${selectedService?._id === s._id ? 'bg-black text-white border-black' : 'bg-white text-black border-[#F5F5F7] hover:border-[#D2D2D7]'}`}
+                                    >
+                                        {s.subcategory} · ₹{s.dynamicPrice || s.basePrice}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="overflow-y-auto flex-1 p-8 space-y-6 custom-scrollbar">
@@ -433,7 +466,11 @@ const Search = () => {
                         <div className="w-full h-full rounded-[4rem] overflow-hidden border border-[#F5F5F7] shadow-inner relative">
                             {coords && (
                                 <MapContainer center={[coords.lat, coords.lng]} zoom={13} style={{ height: '100%', width: '100%' }} zoomControl={false}>
-                                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                                    <TileLayer 
+                                        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" 
+                                        attribution='&copy; OpenStreetMap &copy; CARTO' 
+                                        className="map-tiles-premium"
+                                    />
                                     <ChangeView center={[coords.lat, coords.lng]} />
                                     <Marker position={[coords.lat, coords.lng]}>
                                         <Popup>You are here</Popup>
@@ -460,6 +497,16 @@ const Search = () => {
                                         const lat = sim.lat;
                                         const lng = sim.lng;
 
+                                        // Try to find a specific icon for this category
+                                        const matchingMeta = Object.keys(categoryMeta).find(key => 
+                                            category.toLowerCase().includes(key.toLowerCase()) ||
+                                            (searchQuery && key.toLowerCase().includes(searchQuery.toLowerCase()))
+                                        );
+                                        
+                                        const iconUrl = matchingMeta ? 
+                                            'https://cdn-icons-png.flaticon.com/512/3082/3082383.png' : // default
+                                            'https://cdn-icons-png.flaticon.com/512/684/684908.png';
+
                                         if (!lat || !lng) return null;
 
                                         return (
@@ -467,8 +514,10 @@ const Search = () => {
                                                 key={sim.id || sim.providerId || i} 
                                                 position={[lat, lng]} 
                                                 icon={new L.Icon({ 
-                                                    iconUrl: 'https://cdn-icons-png.flaticon.com/512/3082/3082383.png', 
-                                                    iconSize: [35, 35] 
+                                                    iconUrl: matchingMeta ? 
+                                                        'https://cdn-icons-png.flaticon.com/512/1067/1067555.png' : // Task icon
+                                                        'https://cdn-icons-png.flaticon.com/512/3082/3082383.png', 
+                                                    iconSize: [38, 38] 
                                                 })}
                                             >
                                                 <Popup>

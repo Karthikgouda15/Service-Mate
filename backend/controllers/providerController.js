@@ -28,7 +28,10 @@ const getNearbyProviders = async (req, res) => {
         };
 
         if (service) {
-            query['services.category'] = service;
+            query.$or = [
+                { 'services.category': new RegExp(service, 'i') },
+                { 'services.subcategory': new RegExp(service, 'i') }
+            ];
         }
 
         const providers = await Provider.find(query).populate('userId', 'name email phone avatar').lean();

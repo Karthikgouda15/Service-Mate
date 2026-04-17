@@ -47,8 +47,16 @@ const BookingFlow = () => {
 
     const handleConfirm = async () => {
         try {
+            // SAFE ID EXTRACTION: Ensure we send a valid ID to the backend
+            const actualProviderId = provider.userId?._id || provider.userId || provider._id;
+            
+            if (!actualProviderId) {
+                toast.error('Identity error: Try refreshing the page');
+                return;
+            }
+
             const { data } = await api.post('/bookings', {
-                providerId: provider.userId._id,
+                providerId: actualProviderId,
                 ...bookingData,
                 location: { type: 'Point', coordinates: [77.5946, 12.9716] } // Mock location
             });

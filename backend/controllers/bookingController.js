@@ -6,9 +6,16 @@ const Review = require('../models/Review');
 // @route   POST /api/bookings
 // @access  Private/Customer
 const createBooking = async (req, res) => {
-    const { providerId, serviceType, description, scheduledAt, address, location, price } = req.body;
+    let { providerId, serviceType, description, scheduledAt, address, location, price } = req.body;
 
     try {
+        // ID RESOLUTION: Check if the provided ID is a Provider Profile ID.
+        // If it is, convert it to the User ID to ensure the dashboard sees it.
+        const providerProfile = await Provider.findById(providerId);
+        if (providerProfile) {
+            providerId = providerProfile.userId;
+        }
+
         const booking = await Booking.create({
             customerId: req.user._id,
             providerId,
@@ -24,7 +31,13 @@ const createBooking = async (req, res) => {
         // Emit real-time update to provider
         const io = req.app.get('io');
         if (io) {
+            // Send both the specific 'new_booking' alert and a general refresh signal
             io.to(`provider_${providerId}`).emit('new_booking', booking);
+            io.to(`user_${providerId}`).emit('booking_status_updated', { status: 'pending' });
+            
+            // NEW: Push update to Admin Overseer
+            const { emitAdminUpdate } = require('./adminController');
+            await emitAdminUpdate(io);
         }
 
         res.status(201).json(booking);
@@ -96,7 +109,7 @@ const updateBookingStatus = async (req, res) => {
             booking.paymentStatus = 'paid'; // simplify for MVP
             
             // Increment provider total jobs
-            await Provider.findByIdAndUpdate(booking.providerId, { $inc: { totalJobs: 1 } });
+            await Provider.findOneAndUpdate({ userId: booking.providerId }, { $inc: { totalJobs: 1 } });
         } else if (status === 'cancelled') {
             booking.status = 'cancelled';
         }
@@ -104,18 +117,20 @@ const updateBookingStatus = async (req, res) => {
         booking.timeline.push({ status, timestamp: Date.now() });
         await booking.save();
 
-        // Emit real-time update
         const io = req.app.get('io');
-        const updatePayload = { 
-            bookingId: booking._id,
-            status: booking.status,
-            otp: booking.otp 
-        };
-        
-        io.to(`booking_${booking._id}`).emit('booking_status_updated', updatePayload);
-        // Also emit directly to the individuals so their global dashboards update in real time
-        io.to(`user_${booking.customerId}`).emit('booking_status_updated', updatePayload);
-        io.to(`user_${booking.providerId}`).emit('booking_status_updated', updatePayload);
+        const updatePayload = { status: booking.status, otp: booking.otp };
+
+        if (io) {
+            // Emit real-time update
+            io.to(`booking_${booking._id}`).emit('booking_status_updated', updatePayload);
+            // Also emit directly to the individuals so their global dashboards update in real time
+            io.to(`user_${booking.customerId}`).emit('booking_status_updated', updatePayload);
+            io.to(`user_${booking.providerId}`).emit('booking_status_updated', updatePayload);
+
+            // NEW: Push update to Admin Overseer
+            const { emitAdminUpdate } = require('./adminController');
+            await emitAdminUpdate(io);
+        }
 
         res.json(booking);
     } catch (error) {
@@ -174,7 +189,7 @@ const getProviderBookings = async (req, res) => {
             return res.status(404).json({ message: 'Provider profile not found' });
         }
 
-        const bookings = await Booking.find({ providerId: provider._id })
+        const bookings = await Booking.find({ providerId: req.user._id })
             .populate('customerId', 'name email phone avatar')
             .sort({ createdAt: -1 });
         

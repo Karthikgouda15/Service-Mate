@@ -157,7 +157,11 @@ const Tracking = () => {
                 {/* Map Section */}
                 <div className="flex-1 rounded-[3rem] overflow-hidden border border-[#F5F5F7] shadow-apple-lg relative min-h-[400px]">
                     <MapContainer center={[12.9716, 77.5946]} zoom={14} style={{ height: '100%', width: '100%', zIndex: 1 }} zoomControl={false}>
-                        <TileLayer url="https://{s}.tile.thunderforest.com/atlas/{z}/{x}/{y}.png?apikey=7c352c8ff4764dca82d74d201c107a6d" attribution='&copy; <a href="http://www.thunderforest.com/">Thunderforest</a>' />
+                        <TileLayer 
+                            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" 
+                            attribution='&copy; OpenStreetMap &copy; CARTO' 
+                            className="map-tiles-premium"
+                        />
                         {providerPos && <Marker position={providerPos} icon={providerIcon} />}
                         {booking.location && <Marker position={[booking.location.coordinates[1], booking.location.coordinates[0]]} icon={userIcon} />}
                         <MarkerFitter points={[providerPos, [booking.location.coordinates[1], booking.location.coordinates[0]]]} />

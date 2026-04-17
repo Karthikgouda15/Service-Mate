@@ -14,13 +14,24 @@ const emitAdminUpdate = async (io) => {
 
         const pendingProviders = await Provider.find({ isApproved: false }).populate('userId', 'name email phone avatar');
 
+        const recentBookings = await Booking.find()
+            .populate('customerId', 'name email')
+            .populate({
+                path: 'providerId',
+                select: 'name email',
+                model: 'User'
+            })
+            .sort({ createdAt: -1 })
+            .limit(10);
+
         const data = {
             totalUsers,
             totalProviders,
             totalBookings,
             totalRevenue,
             pendingProvidersCount: pendingProviders.length,
-            pendingProviders
+            pendingProviders,
+            recentBookings
         };
 
         if (io) {
