@@ -1,0 +1,36 @@
+graph TD
+    %% Actors
+    Customer((Customer))
+    Provider((Service Provider))
+    Admin((Administrator))
+
+    subgraph "Service-Mate Core"
+        UC1(Login / Register)
+        UC2(Search & Browse Services)
+        UC3(Book a Service)
+        UC4(Real-time Booking Tracking)
+        UC5(Real-time Chat)
+        UC6(Update Booking Status)
+        UC7(Manage Provider Profile)
+        UC8(User & Platform Mgmt)
+        UC9(Dashboard Analytics)
+    end
+
+    %% Customer Connections
+    Customer --- UC1
+    Customer --- UC2
+    Customer --- UC3
+    Customer --- UC4
+    Customer --- UC5
+
+    %% Provider Connections
+    Provider --- UC1
+    Provider --- UC6
+    Provider --- UC7
+    Provider --- UC5
+
+    %% Admin Connections
+    Admin --- UC1
+    Admin --- UC8
+    Admin --- UC9
+    Admin --- UC3

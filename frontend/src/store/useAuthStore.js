@@ -17,7 +17,8 @@ const useAuthStore = create((set) => ({
             return { success: true, user: data };
         } catch (error) {
             set({ loading: false });
-            return { success: false, message: error.response?.data?.message || 'Login failed' };
+            const errorMessage = error.response?.data?.message || error.message || 'Login failed';
+            return { success: false, message: errorMessage };
         }
     },
 
@@ -31,7 +32,8 @@ const useAuthStore = create((set) => ({
             return { success: true, user: data };
         } catch (error) {
             set({ loading: false });
-            return { success: false, message: error.response?.data?.message || 'Registration failed' };
+            const errorMessage = error.response?.data?.message || error.message || 'Registration failed';
+            return { success: false, message: errorMessage };
         }
     },
 

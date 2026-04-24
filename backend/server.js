@@ -18,8 +18,9 @@ const app = express();
 const server = http.createServer(app);
 const io = socketio(server, {
     cors: {
-        origin: '*', // Adjust for production
-        methods: ['GET', 'POST', 'PUT', 'DELETE']
+        origin: process.env.CORS_ORIGIN || '*', 
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        credentials: true
     }
 });
 
@@ -28,7 +29,10 @@ app.set('io', io);
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: process.env.CORS_ORIGIN || '*',
+    credentials: true
+}));
 app.use(helmet());
 // app.use(mongoSanitize()); // Disabled due to Node v23 Getter-only error on IncomingMessage
 // app.use(xss()); // Disabled due to Node v23 Getter-only error on IncomingMessage
@@ -48,6 +52,11 @@ app.use('/api/admin', require('./routes/adminRoutes'));
 
 // Socket.io initialization
 require('./sockets/socketHandlers')(io);
+
+// Error handling middleware (must be last)
+const { errorMiddleware, notFound } = require('./middleware/errorMiddleware');
+app.use(notFound);
+app.use(errorMiddleware);
 
 const PORT = process.env.PORT || 5000;
 

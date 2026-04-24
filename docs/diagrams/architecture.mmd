@@ -1,0 +1,27 @@
+graph TD
+    subgraph "Client Layer (Frontend)"
+        A[React UI / Vite] --> B[Zustand State Management]
+        B --> C[Axios API Client]
+        B --> D[Socket.io Client]
+    end
+
+    subgraph "Communication Layer"
+        C -- "HTTP / REST" --> E[Express API Server]
+        D -- "WebSockets" --> F[Socket.io Handler]
+    end
+
+    subgraph "Server Layer (Backend)"
+        E --> G[Middleware: JWT Auth, Helmet, CORS]
+        G --> H[Controllers: Auth, Bookings, Services]
+        F --> I[Real-time Events: Tracking, Status, Chat]
+        H & I --> J[Mongoose Models]
+    end
+
+    subgraph "Data Layer"
+        J <--> K[(MongoDB Database)]
+    end
+
+    style A fill:#61DAFB,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#3C873A,stroke:#333,stroke-width:2px,color:#fff
+    style K fill:#47A248,stroke:#333,stroke-width:2px,color:#fff
+    style F fill:#000,stroke:#fff,stroke-width:2px,color:#fff
